@@ -9,8 +9,8 @@ app.use(express.json())
 
 const users = [
     {id: 1, name: 'Sathi', age: 28, email: 'sathi@gmail.com'},
-    {id: 1, name: 'Hridoy', age: 31, email: 'hridoy@gmail.com'},
-    {id: 1, name: 'dina', age: 23, email: 'dina@gmail.com'}
+    {id: 2, name: 'Hridoy', age: 31, email: 'hridoy@gmail.com'},
+    {id: 3, name: 'dina', age: 23, email: 'dina@gmail.com'}
 ]
 
 app.get('/', (req, res) => {
@@ -18,14 +18,14 @@ app.get('/', (req, res) => {
 })
 
 app.get('/users', (req, res) => {
-    // const id = req.params.id
     res.send(users)
 })
 
 app.post('/users', (req, res) => {
-    const user = req.body
-    console.log(user)
-    // res.send(user)
+    const newUser = req.body
+    newUser.id = users.length + 1
+    users.push(newUser)
+    res.send(newUser)
 })
 
 app.listen(port, () => {
