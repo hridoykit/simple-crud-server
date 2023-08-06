@@ -1,5 +1,6 @@
 const express = require('express');
-const cors = require('cors')
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -7,27 +8,44 @@ const port = process.env.PORT || 5000;
 app.use(cors())
 app.use(express.json())
 
-const users = [
-    {id: 1, name: 'Sathi', age: 28, email: 'sathi@gmail.com'},
-    {id: 2, name: 'Hridoy', age: 31, email: 'hridoy@gmail.com'},
-    {id: 3, name: 'dina', age: 23, email: 'dina@gmail.com'}
-]
+const uri = "mongodb+srv://spark1:A8jtIB40dVmnBuCt@cluster0.ylarr1i.mongodb.net/?retryWrites=true&w=majority";
+
+// Create a MongoClient
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+})
 
 app.get('/', (req, res) => {
-    res.send("hello crud operation")
+  res.send('root route is testing')
 })
 
-app.get('/users', (req, res) => {
-    res.send(users)
-})
+async function run() {
+  try {
+    await client.connect();
 
-app.post('/users', (req, res) => {
-    const newUser = req.body
-    newUser.id = users.length + 1
-    users.push(newUser)
-    res.send(newUser)
-})
+    const userCol = client.db("usersDb").collection("users");
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await userCol.insertOne(user);
+      
+      res.send(result);
+    })
+
+
+    await client.db("admin").command({ ping: 1 });
+    console.log("ping: connected to MongoDB successfully");
+    
+  } finally {
+    // await client.close();
+  }
+}
+run().catch(err => console.log(err));
 
 app.listen(port, () => {
-    console.log(`app is running port: ${port}`)
-})
+    console.log(`simple CRUD is running port: ${port}`)
+});
