@@ -29,6 +29,13 @@ async function run() {
 
     const userCol = client.db("usersDb").collection("users");
 
+    app.get('/users', async (req, res) => {
+      const cursor = userCol.find();
+      const result = await cursor.toArray();
+
+      res.send(result);
+    })
+
     app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await userCol.insertOne(user);
