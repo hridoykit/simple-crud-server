@@ -29,27 +29,39 @@ async function run() {
 
     const userCol = client.db("usersDb").collection("users");
 
+    // READ many 
     app.get('/users', async (req, res) => {
       const result = await userCol.find({}).toArray();
 
       res.send(result);
     });
 
-    // get a single user's data
+    // get specific user data
     app.get('/users/:id', async(req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
-      const filteredUser = await userCol.findOne(query);
+      const filter = {_id: new ObjectId(id)};
+      const filteredUser = await userCol.findOne(filter);
 
       res.send(filteredUser);
     });
 
+    // UPDATE
     app.put('/users/:id', async(req, res) => {
       const id = req.params.id;
       const user = req.body;
-      console.log(id, user);
+      // console.log(id, user);
+      const filter = {_id : new ObjectId(id)};
+      const options = {upsert: true};
+      const update = { $set: {
+        name: user.name,
+        email: user.email
+      }};
+      const updatedUser = await userCol.updateOne(filter, update, options);
+
+      res.send(updatedUser);
     })
 
+    // CREATE
     app.post('/users', async (req, res) => {
       const user = req.body;
       const insertedUser = await userCol.insertOne(user);
@@ -57,6 +69,7 @@ async function run() {
       res.send(insertedUser);
     });
 
+    // DELETE
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const qurey = {_id: new ObjectId(id)};
